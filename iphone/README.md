@@ -40,11 +40,19 @@ location.
 touch iphone/test_kernel/versatile-pb.dtb
 touch iphone/test_kernel/kernel-qemu
 touch iphone/test_kernel/linux
+touch iphone/test_kernel/vgabios-stdvga.bin
+```
+
+`vgabios-stdvga.bin` - the VGA bios. Needed for EFI platforms.
+TODO: build it from QEMU tree.
+```
+wget https://qemu.weilnetz.de/w32/2011/2011-04-15/vgabios-stdvga.bin
 ```
 
 `linux` - the image for ARM Virt platform
 ```
 wget http://ftp.debian.org/debian/dists/Debian9.6/main/installer-arm64/current/images/netboot/debian-installer/arm64/linux
+wget https://releases.linaro.org/components/kernel/uefi-linaro/latest/release/qemu64/QEMU_EFI.fd
 ```
 
 `kernel-qemu` and `versatile-pb.dtb` - the image for ARM VersatilePB
@@ -53,6 +61,9 @@ wget https://github.com/dhruvvyas90/qemu-rpi-kernel/raw/master/kernel-qemu-4.4.3
 mv kernel-qemu-4.4.34-jessie kernel-qemu
 wget https://github.com/dhruvvyas90/qemu-rpi-kernel/raw/master/
 ```
+
+To add a disk image or another file, copy it via iTunes file sharing.
+For example, the file name for the raspberry pi disk image is `rpi_mmc.img`.
 
 Edit the command line options in `main.m` and run via Xcode.
 If you are running on a jailbroken device and your kernel is patched to allow RWX memory mapping, you can try enabling JIT (TCG) by commenting out the option `--enable-tcg-interpreter` in `iphone/build-qemu-ios.sh`

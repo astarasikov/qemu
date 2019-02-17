@@ -10,6 +10,9 @@
 		1100F74E21E1FF97004A750B /* kernel-qemu in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1100F74D21E1FF88004A750B /* kernel-qemu */; };
 		1100F75021E20276004A750B /* linux in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1100F74F21E2020B004A750B /* linux */; };
 		114D27C72219EA4100B9D2A1 /* versatile-pb.dtb in CopyFiles */ = {isa = PBXBuildFile; fileRef = 114D27C62219EA4000B9D2A1 /* versatile-pb.dtb */; };
+		1158B8652219F73300F4A84D /* QEMU_EFI.fd in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1158B8642219F73200F4A84D /* QEMU_EFI.fd */; };
+		1158B8672219FB3100F4A84D /* vgabios-stdvga.bin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1158B8662219FB3100F4A84D /* vgabios-stdvga.bin */; };
+		1158B869221A008100F4A84D /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1158B868221A008100F4A84D /* Default-568h@2x.png */; };
 		116B9DA621E1C0A1007A28FF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 116B9DA521E1C0A1007A28FF /* Assets.xcassets */; };
 		116B9DAC21E1C0A1007A28FF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 116B9DAB21E1C0A1007A28FF /* main.m */; };
 		116B9DC421E1DC6E007A28FF /* libqemu-aarch64-softmmu.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 116B9DC321E1DC6E007A28FF /* libqemu-aarch64-softmmu.dylib */; };
@@ -35,6 +38,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				1158B8672219FB3100F4A84D /* vgabios-stdvga.bin in CopyFiles */,
+				1158B8652219F73300F4A84D /* QEMU_EFI.fd in CopyFiles */,
 				114D27C72219EA4100B9D2A1 /* versatile-pb.dtb in CopyFiles */,
 				1100F75021E20276004A750B /* linux in CopyFiles */,
 				1100F74E21E1FF97004A750B /* kernel-qemu in CopyFiles */,
@@ -48,6 +53,9 @@
 		1100F74D21E1FF88004A750B /* kernel-qemu */ = {isa = PBXFileReference; lastKnownFileType = file; name = "kernel-qemu"; path = "../../../test_kernel/kernel-qemu"; sourceTree = "<group>"; };
 		1100F74F21E2020B004A750B /* linux */ = {isa = PBXFileReference; lastKnownFileType = file; name = linux; path = ../../../test_kernel/linux; sourceTree = "<group>"; };
 		114D27C62219EA4000B9D2A1 /* versatile-pb.dtb */ = {isa = PBXFileReference; lastKnownFileType = file; name = "versatile-pb.dtb"; path = "../../test_kernel/versatile-pb.dtb"; sourceTree = "<group>"; };
+		1158B8642219F73200F4A84D /* QEMU_EFI.fd */ = {isa = PBXFileReference; lastKnownFileType = file; name = QEMU_EFI.fd; path = ../../test_kernel/QEMU_EFI.fd; sourceTree = "<group>"; };
+		1158B8662219FB3100F4A84D /* vgabios-stdvga.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = "vgabios-stdvga.bin"; path = "../../test_kernel/vgabios-stdvga.bin"; sourceTree = "<group>"; };
+		1158B868221A008100F4A84D /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		116B9D9921E1C0A0007A28FF /* QemuLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QemuLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		116B9DA521E1C0A1007A28FF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		116B9DAA21E1C0A1007A28FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -73,6 +81,9 @@
 		116B9D9021E1C0A0007A28FF = {
 			isa = PBXGroup;
 			children = (
+				1158B868221A008100F4A84D /* Default-568h@2x.png */,
+				1158B8662219FB3100F4A84D /* vgabios-stdvga.bin */,
+				1158B8642219F73200F4A84D /* QEMU_EFI.fd */,
 				114D27C62219EA4000B9D2A1 /* versatile-pb.dtb */,
 				116B9D9B21E1C0A0007A28FF /* QemuLauncher */,
 				116B9D9A21E1C0A0007A28FF /* Products */,
@@ -171,6 +182,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				116B9DA621E1C0A1007A28FF /* Assets.xcassets in Resources */,
+				1158B869221A008100F4A84D /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
