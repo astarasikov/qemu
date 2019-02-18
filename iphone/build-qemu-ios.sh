@@ -57,4 +57,5 @@ export PREFIX_PIXMAN=${QEMU_IOS_ROOT}/dependencies/pixman/arm64
 	--disable-libssh2 \
 	--disable-seccomp \
 	--disable-usb-redir \
-	--disable-libpmem
+	--disable-libpmem \
+	--disable-coroutine-pool
