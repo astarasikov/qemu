@@ -59,7 +59,7 @@ static inline void cpu_set_tls(CPUARMState *env, target_ulong newtls)
     if (access_secure_reg(env)) {
         env->cp15.tpidruro_s = newtls;
     } else {
-        env->cp15.tpidrro_el[0] = newtls;
+        env->cp15.tpidrurw_ns = newtls;
     }
 }
 
@@ -68,7 +68,7 @@ static inline target_ulong cpu_get_tls(CPUARMState *env)
     if (access_secure_reg(env)) {
         return env->cp15.tpidruro_s;
     } else {
-        return env->cp15.tpidrro_el[0];
+        return env->cp15.tpidrurw_ns;
     }
 }
 

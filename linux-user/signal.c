@@ -645,8 +645,14 @@ static void QEMU_NORETURN dump_core_and_abort(int target_sig)
         getrlimit(RLIMIT_CORE, &nodump);
         nodump.rlim_cur=0;
         setrlimit(RLIMIT_CORE, &nodump);
-        (void) fprintf(stderr, "qemu: uncaught target signal %d (%s) - %s\n",
-            target_sig, strsignal(host_sig), "core dumped" );
+	uint32_t pc = 0, lr = 0;
+#ifdef TARGET_ARM
+	CPUARMState *arm = (CPUARMState*)env;
+	lr = arm->regs[14];
+	pc = arm->regs[15];
+#endif
+        (void) fprintf(stderr, "qemu: uncaught target signal %d (%s) - %s pc=%08x lr=%08x\n",
+            target_sig, strsignal(host_sig), "core dumped" , pc, lr);
     }
 
     /* The proper exit code for dying from an uncaught signal is

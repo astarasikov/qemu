@@ -2076,11 +2076,14 @@ static inline bool arm_el_is_aa64(CPUARMState *env, int el)
  */
 static inline bool access_secure_reg(CPUARMState *env)
 {
+#if 0
     bool ret = (arm_feature(env, ARM_FEATURE_EL3) &&
                 !arm_el_is_aa64(env, 3) &&
                 !(env->cp15.scr_el3 & SCR_NS));
-
     return ret;
+#else
+	return 0;
+#endif
 }
 
 /* Macros for accessing a specified CP register bank */

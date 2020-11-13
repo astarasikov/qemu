@@ -201,6 +201,9 @@ static void collect_memory_snapshot(void) {
     if ((fields < 10) || (fields > 11))
         continue;
     
+	if (!h2g_valid(min)) {
+		continue;
+	}
     int flags = page_get_flags(h2g(min));
     
     max = h2g_valid(max - 1) ? max : (uintptr_t)g2h(GUEST_ADDR_MAX) + 1;
@@ -711,7 +714,7 @@ void afl_forkserver(CPUState *cpu) {
     else if (unlikely(first_run && is_persistent)) {
 
       fprintf(stderr, "[AFL] ERROR: no persistent iteration executed\n");
-      exit(12);  // Persistent is wrong
+      //exit(12);  // Persistent is wrong
 
     }
 

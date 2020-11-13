@@ -150,6 +150,24 @@ segv:
     queue_signal(env, info.si_signo, QEMU_SI_FAULT, &info);
 }
 
+//TODO: use a shared header with ../syscall.c
+#define QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_DONE 0xffff0f42
+#define QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_SUCCESS 0xffff0f62
+#define QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_PERSIST 0xffff0f82
+
+typedef void (*qemu_linux_user_arm_afl_updater)(void *cpu_env);
+
+static qemu_linux_user_arm_afl_updater afl_updater;
+void qemu_linux_user_arm_register_afl_updater(
+		qemu_linux_user_arm_afl_updater callback)
+{
+	afl_updater = callback;
+}
+
+
+//oh no
+extern void afl_persistent_loop(CPUArchState *env);
+
 /* Handle a jump to the kernel code page.  */
 static int
 do_kernel_trap(CPUARMState *env)
@@ -159,6 +177,39 @@ do_kernel_trap(CPUARMState *env)
     uint32_t val;
 
     switch (env->regs[15]) {
+		fprintf(stderr, "%s:pc=%08x\n", __func__, env->regs[15]);
+	case QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_SUCCESS:
+		//TEEGRIS fuzzer progress indicator
+		//we use this value to check that the tested binary
+		//has reached a previously unreachable block
+		//and check for this string in the shell script
+		fprintf(stderr, "%s: TEEGRIS PC_SUCCESS\n", __func__);
+		exit(0);
+		break;
+	case QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_DONE:
+		//TEEGRIS fuzzer normal exit
+		fprintf(stderr, "%s: TEEGRIS fuzzing done OK\n", __func__);
+		exit(0);
+		break;
+	case QEMU_LINUX_USER_ARM_KTRAP_TEEGRIS_PERSIST:
+		fprintf(stderr, "%s: TEEGRIS fuzzing persist iteration\n", __func__);
+		if (afl_updater) {
+			//ensure we resume with the correct state
+			//to enter the TA entrypoint
+			afl_updater(env);
+			afl_persistent_loop(env);
+			{
+				static int count = 0;
+				count++;
+				if (count > 100) {
+					exit(0);
+				}
+			}
+		}
+		else {
+			exit(-1);
+		}
+		return 0;
     case 0xffff0fa0: /* __kernel_memory_barrier */
         /* ??? No-op. Will need to do better for SMP.  */
         break;
@@ -327,7 +378,7 @@ void cpu_loop(CPUARMState *env)
                         env->eabi = 0;
                     }
                 }
-
+#if 0
                 if (n > ARM_NR_BASE) {
                     switch (n) {
                     case ARM_NR_cacheflush:
@@ -376,13 +427,17 @@ void cpu_loop(CPUARMState *env)
                         }
                         break;
                     }
-                } else {
+                } else
+#endif
+				{
+#if 0
                     if (persistent_exits && n == TARGET_NR_exit_group) {
                       env->regs[15] = afl_persistent_addr;
                       break;
                     }
+#endif
                     ret = do_syscall(env,
-                                     n,
+                                     env->regs[7],
                                      env->regs[0],
                                      env->regs[1],
                                      env->regs[2],
