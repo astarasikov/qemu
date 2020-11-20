@@ -26,14 +26,14 @@ void runQemu(void)
         NSLog(@"iTunes shared file %d: %@", (Count + 1), [directoryContent objectAtIndex:Count]);
     }
     
-    char *qargs2[] = {
+    char *qargs1[] = {
         "yolo",
-        "-M", "virt-2.6",
+        "-M", "virt,kernel_irqchip=on,gic-version=2",
         "-cpu", "cortex-a57",
         "-bios", "QEMU_EFI.fd",
         "-m", "512M",
         "-kernel", "linux",
-        "-append", "earlycon=pl011,0x9000000 console=ttyAMA0 console=fb0 lpj=200000 rootwait root=/dev/sda2",
+        "-append", "earlycon=pl011,0x9000000 console=ttyAMA0 console=fb0 acpi=off lpj=200000 rootwait root=/dev/sda2",
         "-serial", "mon:stdio",
         "-display", "iphone",
         "-device", "VGA",
@@ -50,21 +50,18 @@ void runQemu(void)
         "-dtb", "versatile-pb.dtb",
         "-serial", "mon:stdio",
         "-display", "iphone",
-        "-drive", "file=" DOCS_FILE_PREFIX "/rpi_mmc.img,format=raw",
-        //"-nographic"
+        //"-drive", "file=" DOCS_FILE_PREFIX "/rpi_mmc.img,format=raw",
     };
     
     char *qargs_x86[] = {
         "yolo",
         "-m", "256M",
-        "-cdrom", "kolibri.iso",
+        "-drive", "file=" DOCS_FILE_PREFIX "/kolibri.iso,media=cdrom",
         "-serial", "mon:stdio",
         "-display", "iphone",
         "-vga", "std",
-        //"-nographic"
     };
     
-
     int qargc = sizeof(qargs) / sizeof(qargs[0]);
     for (int arg = 0; arg < qargc; arg++) {
         char *fname = qargs[arg];

@@ -51,10 +51,14 @@ static void SwitchToFiber(Coroutine *fiber)
 	assert(CoroContext != NULL);
 	struct CoroContext *cc = CoroContext;
 	pthread_mutex_lock(&cc->mutex);
+	while (cc->current) {
+		pthread_cond_wait(&cc->cond, &cc->mutex);
+	}
 	cc->current = fiber;
 	pthread_cond_signal(&cc->cond);
 	pthread_mutex_unlock(&cc->mutex);
 
+#if 1
 	while (true) {
 		int should_break = 0;
 		pthread_mutex_lock(&cc->mutex);
@@ -65,6 +69,7 @@ static void SwitchToFiber(Coroutine *fiber)
 		}
 		sleep(1);
 	}
+#endif
 }
 
 static void *CoroThread(void *arg)
@@ -80,6 +85,7 @@ static void *CoroThread(void *arg)
 			coroutine_trampoline(cc->current);
 			cc->current = NULL;
 		}
+		pthread_cond_signal(&cc->cond);
 		pthread_mutex_unlock(&cc->mutex);
 	}
 	return NULL;
@@ -100,32 +106,47 @@ qemu_coroutine_switch(Coroutine *from_, Coroutine *to_,
     CoroutineWin32 *from = DO_UPCAST(CoroutineWin32, base, from_);
     CoroutineWin32 *to = DO_UPCAST(CoroutineWin32, base, to_);
 
-	printf("%s: from e=%p to e=%p action=%d\n", __func__, from_->entry, to_->entry, action);
-    to->action = action;
+	printf("%s: from e=%p to e=%p action=%d in_coro=%d\n", __func__, from_->entry, to_->entry, action, !CoroContext);
+	to->action = action;
 
 	if (CoroContext) {
 		SwitchToFiber(to_);
 	}
 	else {
 		current = to_;
+		Coroutine tmp = {};
+		memmove(&tmp, to_, sizeof(Coroutine));
+		memmove(to_, from_, sizeof(Coroutine));
+		memmove(from_, &tmp, sizeof(Coroutine));
 	}
-    return from->action ? from->action : COROUTINE_YIELD;
+    return from->action ? from->action : COROUTINE_TERMINATE;
 }
 
-static void coroutine_trampoline(Coroutine *co_)
+static void __attribute__((noinline)) coroutine_trampoline(Coroutine *co_)
 {
     Coroutine *co = co_;
-	printf("%s: co->entry=%p\n", __func__, co->entry);
+	printf("%s: co->entry=%p arg=%p\n", __func__,
+			co ? co->entry : NULL, co ? co->entry_arg : NULL);
 
-    while (co && co->entry) {
-		printf("%s: call co->entry=%p arg=%p\n", __func__, co->entry, co->entry_arg);
+    while (true) {
+		CoroutineWin32 *con = DO_UPCAST(CoroutineWin32, base, co);
 		current = co;
-		co->entry(co->entry_arg);
-		co->entry = NULL;
-		if (co->caller) {
-			qemu_coroutine_switch(co, co->caller, COROUTINE_TERMINATE);
+		printf("%s: call co->entry=%p arg=%p ns=%d\n", __func__,
+				co ? co->entry : NULL, co ? co->entry_arg : NULL, con->action);
+		if (co->entry) {
+			co->entry(co->entry_arg);
 		}
-		co = co->caller;
+		if (co->caller) {
+			CoroutineAction ca = qemu_coroutine_switch(co, co->caller, COROUTINE_TERMINATE);
+			printf("%s: return action %d\n", __func__, ca);
+
+			//if (ca != COROUTINE_ENTER) {
+				break;
+			//}
+		}
+		if (!co->entry) {
+			break;
+		}
     }
 }
 
@@ -142,7 +163,11 @@ Coroutine *qemu_coroutine_new(void)
 		CoroContext = g_malloc0(sizeof(*CoroContext));
 		pthread_cond_init(&CoroContext->cond, NULL);
 		pthread_mutex_init(&CoroContext->mutex, NULL);
-		pthread_create(&the_thread, NULL, CoroThread, CoroContext);
+
+		pthread_attr_t tattr;
+		pthread_attr_init(&tattr);
+		pthread_attr_setstacksize(&tattr, COROUTINE_STACK_SIZE);
+		pthread_create(&the_thread, &tattr, CoroThread, CoroContext);
 		sleep(1);
 	}
     return &co->base;
@@ -158,7 +183,7 @@ Coroutine *qemu_coroutine_self(void)
 {
     if (!current) {
         current = &leader.base;
-		leader.action = COROUTINE_YIELD;
+		leader.action = COROUTINE_TERMINATE;
     }
     return current;
 }
